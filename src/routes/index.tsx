@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SatelliteTab } from "@/components/SatelliteTab";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -39,7 +40,7 @@ const REQS = [
 ];
 
 const fmt = (t: number) => new Date(t).toLocaleTimeString([], { hour12: false });
-const TABS = ["Overview", "Whitelist", "Carriers", "Latency Audit", "Traceability"] as const;
+const TABS = ["Overview", "Whitelist", "Satellite", "Carriers", "Latency Audit", "Traceability"] as const;
 
 function Console() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
@@ -148,6 +149,8 @@ function Console() {
         )}
 
         {tab === "Whitelist" && <WhitelistTab list={whitelist} setList={setWhitelist} log={log} />}
+
+        {tab === "Satellite" && <SatelliteTab onAlert={(z, p) => { setBurst(10); log(`Satellite analysis: priority alert dispatched to ${z} (${p.toLocaleString()} residents) via whitelisted route.`, "warn"); }} />}
 
         {tab === "Carriers" && (
           <div className="grid gap-6 lg:grid-cols-3">

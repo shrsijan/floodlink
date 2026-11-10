@@ -14,7 +14,7 @@ export function SatelliteTab({ onAlert }: { onAlert: (zone: string, pop: number)
   const [live, setLive] = useState(true);
   const [countdown, setCountdown] = useState(20);
   const [layers, setLayers] = useState({ water: true, zones: true, grid: false });
-  const [sel, setSel] = useState(ZONES[0].id);
+  const [sel, setSel] = useState<string>("Z1");
 
   useEffect(() => {
     if (!live) return;

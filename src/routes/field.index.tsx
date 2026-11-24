@@ -1,0 +1,17 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpRight, MapPin, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useFieldDemo } from "@/components/FieldDemoContext";
+import { DeviceMap, StatusBadge } from "@/components/FieldDeviceUI";
+import { deviceCounts, urgency } from "@/lib/field-demo";
+
+export const Route = createFileRoute("/field/")({
+  head: () => ({ meta: [{ title: "My Devices — FloodLink Field Technician" }, { name: "description", content: "Monitor six assigned flood sensors and complete simulated on-site maintenance visits." }, { property: "og:title", content: "My Devices — FloodLink Field Technician" }, { property: "og:description", content: "Field sensor health, urgent maintenance and volunteer visits in Riverdale." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  component: MyDevices,
+});
+function MyDevices() {
+  const { devices, reset } = useFieldDemo();
+  const counts = deviceCounts(devices);
+  return <div className="space-y-6"><div className="flex items-center justify-between gap-3"><h1 className="text-2xl font-bold">My Devices</h1><Button variant="ghost" className="h-11 px-2 text-xs text-muted-foreground" onClick={() => { reset(); toast("Demo data reset"); }}><RotateCcw />Reset demo data</Button></div><div className="flex flex-wrap gap-2" aria-label="Device status counts">{[{ label: "Healthy", value: counts.healthy, tone: "text-success" }, { label: "Needs attention", value: counts.attention, tone: "text-primary" }, { label: "Offline", value: counts.offline, tone: "text-destructive" }].map((c) => <div key={c.label} className={`flex items-center gap-2 rounded border border-border bg-card px-3 py-2 text-xs ${c.tone}`}><span className="font-mono text-lg">{c.value}</span>{c.label}</div>)}</div><DeviceMap devices={devices} /><div className="flex items-center justify-between"><h2 className="font-semibold">Assigned sites</h2><span className="font-mono text-[10px] text-muted-foreground">URGENCY FIRST</span></div><div className="grid gap-3 sm:grid-cols-2">{[...devices].sort((a, b) => urgency(a) - urgency(b) || a.distance - b.distance).map((d) => <article key={d.id} className="flex min-w-0 flex-col rounded-md border border-border bg-card p-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><Link to="/field/$deviceId" params={{ deviceId: d.id }} className="font-mono text-sm text-accent">{d.id}</Link><StatusBadge status={d.status} /></div><Link to="/field/$deviceId" params={{ deviceId: d.id }} className="text-lg font-semibold">{d.site}</Link><p className="mt-1 text-xs text-muted-foreground">{d.zone}</p><p className="mb-4 mt-3 text-sm">{d.issues[0]?.title ?? "All systems operating normally"}</p><div className="mt-auto flex items-center justify-between gap-2"><span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin size={14} />{d.distance.toFixed(1)} km</span><Button asChild className="h-11"><Link to="/field/$deviceId" params={{ deviceId: d.id }} search={{ visit: true }}>Start visit<ArrowUpRight /></Link></Button></div></article>)}</div></div>;
+}

@@ -1,6 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SatelliteTab } from "@/components/SatelliteTab";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFieldDemo } from "@/components/FieldDemoContext";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/FieldDeviceUI";
+import { Wrench } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,6 +47,7 @@ const fmt = (t: number) => new Date(t).toLocaleTimeString([], { hour12: false })
 const TABS = ["Overview", "Whitelist", "Satellite", "Carriers", "Latency Audit", "Traceability"] as const;
 
 function Console() {
+  const { devices, events: fieldEvents } = useFieldDemo();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const [whitelist, setWhitelist] = useState([
     { path: "/alert-api/v1/broadcast", exempt: true },
@@ -112,9 +117,12 @@ function Console() {
               <p className="text-xs text-muted-foreground">Emergency Alert SMS · Regional Network Engineering</p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-4">
+          <Button asChild variant="outline" className="h-11"><Link to="/field"><Wrench />Field Technician</Link></Button>
           <div className="flex items-center gap-2 font-mono text-xs">
             <span className={`h-2 w-2 rounded-full pulse-dot ${active === "PRIMARY" ? "bg-success" : "bg-destructive"}`} />
             ACTIVE CARRIER: <span className={active === "PRIMARY" ? "text-success" : "text-destructive"}>{active}</span>
+          </div>
           </div>
         </div>
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6">
@@ -142,9 +150,13 @@ function Console() {
                 </button>
               </Panel>
               <Panel title="Event feed" tag="F6 · R10">
-                <EventList events={events} />
+                <EventList events={[...fieldEvents, ...events].sort((a, b) => b.ts - a.ts)} />
               </Panel>
             </div>
+            <section className="border-t border-border pt-6">
+              <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">Field sensor health</h2><Link to="/field" className="text-sm text-accent">My Devices →</Link></div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{devices.map((d) => <Link key={d.id} to="/field/$deviceId" params={{ deviceId: d.id }} className="rounded border border-border bg-card p-4"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-sm">{d.id}</span><StatusBadge status={d.status} /></div><p className="mt-2 text-sm">{d.site}</p><p className="mt-1 text-xs text-muted-foreground">{d.issues[0]?.title ?? "All systems healthy"}</p></Link>)}</div>
+            </section>
           </>
         )}
 

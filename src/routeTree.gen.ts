@@ -10,33 +10,60 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FieldRouteImport } from './routes/field'
+import { Route as FieldIndexRouteImport } from './routes/field.index'
+import { Route as FieldDeviceIdRouteImport } from './routes/field.$deviceId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FieldRoute = FieldRouteImport.update({
+  id: '/field',
+  path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FieldIndexRoute = FieldIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FieldRoute,
+} as any)
+const FieldDeviceIdRoute = FieldDeviceIdRouteImport.update({
+  id: '/$deviceId',
+  path: '/$deviceId',
+  getParentRoute: () => FieldRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/field': typeof FieldRouteWithChildren
+  '/field/$deviceId': typeof FieldDeviceIdRoute
+  '/field/': typeof FieldIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/field/$deviceId': typeof FieldDeviceIdRoute
+  '/field': typeof FieldIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/field': typeof FieldRouteWithChildren
+  '/field/$deviceId': typeof FieldDeviceIdRoute
+  '/field/': typeof FieldIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/field' | '/field/$deviceId' | '/field/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/field/$deviceId' | '/field'
+  id: '__root__' | '/' | '/field' | '/field/$deviceId' | '/field/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FieldRoute: typeof FieldRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +75,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/field': {
+      id: '/field'
+      path: '/field'
+      fullPath: '/field'
+      preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/field/': {
+      id: '/field/'
+      path: '/'
+      fullPath: '/field/'
+      preLoaderRoute: typeof FieldIndexRouteImport
+      parentRoute: typeof FieldRoute
+    }
+    '/field/$deviceId': {
+      id: '/field/$deviceId'
+      path: '/$deviceId'
+      fullPath: '/field/$deviceId'
+      preLoaderRoute: typeof FieldDeviceIdRouteImport
+      parentRoute: typeof FieldRoute
+    }
   }
 }
 
+interface FieldRouteChildren {
+  FieldDeviceIdRoute: typeof FieldDeviceIdRoute
+  FieldIndexRoute: typeof FieldIndexRoute
+}
+
+const FieldRouteChildren: FieldRouteChildren = {
+  FieldDeviceIdRoute: FieldDeviceIdRoute,
+  FieldIndexRoute: FieldIndexRoute,
+}
+
+const FieldRouteWithChildren = FieldRoute._addFileChildren(FieldRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FieldRoute: FieldRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

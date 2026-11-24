@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project architecture
+- Keep simulated field devices, visit history and restoration events in the root-mounted FieldDemoProvider so operator and field routes share one in-memory session without a backend.
+- Keep field maintenance rules in the browser-safe field-demo module and render visits through FieldVisit so checklist, calibration and resolution rules remain independently testable.
+- Use /field as an Outlet layout with index and device-detail children so the shared role header persists across field screens.

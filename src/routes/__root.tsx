@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FieldDemoProvider } from "@/components/FieldDemoContext";
+import { SessionProvider } from "@/components/SessionContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -124,10 +125,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FieldDemoProvider>
-        <Outlet />
-        <Toaster />
-      </FieldDemoProvider>
+      <SessionProvider>
+        <FieldDemoProvider>
+          <Outlet />
+          <Toaster />
+        </FieldDemoProvider>
+      </SessionProvider>
     </QueryClientProvider>
   );
 }

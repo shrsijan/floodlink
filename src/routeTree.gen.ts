@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as FieldRouteImport } from './routes/field'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResidentRouteImport } from './routes/resident'
+import { Route as ResponderRouteImport } from './routes/responder'
 import { Route as FieldIndexRouteImport } from './routes/field.index'
 import { Route as FieldDeviceIdRouteImport } from './routes/field.$deviceId'
 
@@ -19,9 +23,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FieldRoute = FieldRouteImport.update({
   id: '/field',
   path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResidentRoute = ResidentRouteImport.update({
+  id: '/resident',
+  path: '/resident',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResponderRoute = ResponderRouteImport.update({
+  id: '/responder',
+  path: '/responder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldIndexRoute = FieldIndexRouteImport.update({
@@ -37,33 +61,73 @@ const FieldDeviceIdRoute = FieldDeviceIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/field': typeof FieldRouteWithChildren
+  '/login': typeof LoginRoute
+  '/resident': typeof ResidentRoute
+  '/responder': typeof ResponderRoute
   '/field/$deviceId': typeof FieldDeviceIdRoute
   '/field/': typeof FieldIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/resident': typeof ResidentRoute
+  '/responder': typeof ResponderRoute
   '/field/$deviceId': typeof FieldDeviceIdRoute
   '/field': typeof FieldIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/field': typeof FieldRouteWithChildren
+  '/login': typeof LoginRoute
+  '/resident': typeof ResidentRoute
+  '/responder': typeof ResponderRoute
   '/field/$deviceId': typeof FieldDeviceIdRoute
   '/field/': typeof FieldIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/field' | '/field/$deviceId' | '/field/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/field'
+    | '/login'
+    | '/resident'
+    | '/responder'
+    | '/field/$deviceId'
+    | '/field/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/field/$deviceId' | '/field'
-  id: '__root__' | '/' | '/field' | '/field/$deviceId' | '/field/'
+  to:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/resident'
+    | '/responder'
+    | '/field/$deviceId'
+    | '/field'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/field'
+    | '/login'
+    | '/resident'
+    | '/responder'
+    | '/field/$deviceId'
+    | '/field/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   FieldRoute: typeof FieldRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  ResidentRoute: typeof ResidentRoute
+  ResponderRoute: typeof ResponderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +139,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/field': {
       id: '/field'
       path: '/field'
       fullPath: '/field'
       preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resident': {
+      id: '/resident'
+      path: '/resident'
+      fullPath: '/resident'
+      preLoaderRoute: typeof ResidentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/responder': {
+      id: '/responder'
+      path: '/responder'
+      fullPath: '/responder'
+      preLoaderRoute: typeof ResponderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/field/': {
@@ -113,7 +205,11 @@ const FieldRouteWithChildren = FieldRoute._addFileChildren(FieldRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   FieldRoute: FieldRouteWithChildren,
+  LoginRoute: LoginRoute,
+  ResidentRoute: ResidentRoute,
+  ResponderRoute: ResponderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

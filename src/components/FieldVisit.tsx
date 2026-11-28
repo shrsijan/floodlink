@@ -4,12 +4,14 @@ import { ArrowLeft, ArrowRight, Check, CheckCircle2, Camera, LoaderCircle } from
 import { Button } from "@/components/ui/button";
 import { CameraPlaceholder } from "@/components/FieldDeviceUI";
 import { useFieldDemo } from "@/components/FieldDemoContext";
+import { useSession } from "@/components/SessionContext";
 import { calibrationOffset, checklistFor, inspectionComplete, needsCalibration, selfTestFailure, type Device } from "@/lib/field-demo";
 
 const CHECKS = ["Power", "Sensor", "Camera", "Uplink to Waterline"];
 export function FieldVisit({ device, onCancel }: { device: Device; onCancel: () => void }) {
   const navigate = useNavigate();
   const { completeVisit } = useFieldDemo();
+  const { user } = useSession();
   const calibrate = needsCalibration(device);
   const steps = ["Arrive", "Inspect", ...(calibrate ? ["Calibrate"] : []), "Photo and notes", "Self-test", "Done"];
   const [step, setStep] = useState(0);
@@ -45,7 +47,7 @@ export function FieldVisit({ device, onCancel }: { device: Device; onCancel: () 
   const resolve = async () => {
     if (!passed || arrived === null) return;
     const now = Date.now();
-    completeVisit(device.id, { id: `${device.id}-${now}`, date: new Date(now).toISOString(), technician: "Priya Rai", actions: [...checked, ...(gauge !== null ? [`Calibrated offset ${(calibrationOffset(device.water, gauge) * 100).toFixed(1)} cm`] : []), "Self-test passed"], notes, photo, duration, before, after }, gauge);
+    completeVisit(device.id, { id: `${device.id}-${now}`, date: new Date(now).toISOString(), technician: user?.name ?? "Field technician", actions: [...checked, ...(gauge !== null ? [`Calibrated offset ${(calibrationOffset(device.water, gauge) * 100).toFixed(1)} cm`] : []), "Self-test passed"], notes, photo, duration, before, after }, gauge);
     await navigate({ to: "/field" });
   };
   return <section className="mx-auto max-w-2xl space-y-6">

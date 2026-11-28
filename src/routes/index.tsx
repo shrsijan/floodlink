@@ -5,6 +5,9 @@ import { useFieldDemo } from "@/components/FieldDemoContext";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/FieldDeviceUI";
 import { Wrench } from "lucide-react";
+import { RoleGate, UserBadge, useSession } from "@/components/SessionContext";
+import { canAccess } from "@/lib/demo-users";
+import { AreaNav } from "@/components/AppHeader";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,7 +20,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Console,
+  component: () => <RoleGate area="console"><Console /></RoleGate>,
 });
 
 type Carrier = "PRIMARY" | "SECONDARY";
@@ -47,7 +50,9 @@ const fmt = (t: number) => new Date(t).toLocaleTimeString([], { hour12: false })
 const TABS = ["Overview", "Whitelist", "Satellite", "Carriers", "Latency Audit", "Traceability"] as const;
 
 function Console() {
-  const { devices, events: fieldEvents } = useFieldDemo();
+  const { devices, events: fieldEvents, broadcastAlert } = useFieldDemo();
+  const { user } = useSession();
+  const fieldAccess = canAccess(user, "field");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const [whitelist, setWhitelist] = useState([
     { path: "/alert-api/v1/broadcast", exempt: true },
@@ -118,11 +123,13 @@ function Console() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-          <Button asChild variant="outline" className="h-11"><Link to="/field"><Wrench />Field Technician</Link></Button>
+          {fieldAccess && <Button asChild variant="outline" className="h-11"><Link to="/field"><Wrench />Field Technician</Link></Button>}
           <div className="flex items-center gap-2 font-mono text-xs">
             <span className={`h-2 w-2 rounded-full pulse-dot ${active === "PRIMARY" ? "bg-success" : "bg-destructive"}`} />
             ACTIVE CARRIER: <span className={active === "PRIMARY" ? "text-success" : "text-destructive"}>{active}</span>
           </div>
+          <AreaNav current="console" />
+          <UserBadge />
           </div>
         </div>
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6">
@@ -154,15 +161,15 @@ function Console() {
               </Panel>
             </div>
             <section className="border-t border-border pt-6">
-              <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">Field sensor health</h2><Link to="/field" className="text-sm text-accent">My Devices →</Link></div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{devices.map((d) => <Link key={d.id} to="/field/$deviceId" params={{ deviceId: d.id }} className="rounded border border-border bg-card p-4"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-sm">{d.id}</span><StatusBadge status={d.status} /></div><p className="mt-2 text-sm">{d.site}</p><p className="mt-1 text-xs text-muted-foreground">{d.issues[0]?.title ?? "All systems healthy"}</p></Link>)}</div>
+              <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">Field sensor health</h2>{fieldAccess && <Link to="/field" className="text-sm text-accent">My Devices →</Link>}</div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{devices.map((d) => <Link key={d.id} to="/field/$deviceId" params={{ deviceId: d.id }} disabled={!fieldAccess} className="rounded border border-border bg-card p-4"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-sm">{d.id}</span><StatusBadge status={d.status} /></div><p className="mt-2 text-sm">{d.site}</p><p className="mt-1 text-xs text-muted-foreground">{d.issues[0]?.title ?? "All systems healthy"}</p></Link>)}</div>
             </section>
           </>
         )}
 
         {tab === "Whitelist" && <WhitelistTab list={whitelist} setList={setWhitelist} log={log} />}
 
-        {tab === "Satellite" && <SatelliteTab onAlert={(z, p) => { setBurst(10); log(`Satellite analysis: priority alert dispatched to ${z} (${p.toLocaleString()} residents) via whitelisted route.`, "warn"); }} />}
+        {tab === "Satellite" && <SatelliteTab onAlert={(z, p) => { setBurst(10); broadcastAlert(z, `Flood alert for ${z}: satellite imagery shows rising water. Move to higher ground and avoid low roads.`); log(`Satellite analysis: priority alert dispatched to ${z} (${p.toLocaleString()} residents) via whitelisted route.`, "warn"); }} />}
 
         {tab === "Carriers" && (
           <div className="grid gap-6 lg:grid-cols-3">
